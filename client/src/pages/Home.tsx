@@ -1,21 +1,11 @@
+import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload, Download, Zap, Lock, Smartphone, Clock, FileText, Image as ImageIcon } from "lucide-react";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
-
-/**
- * Universal File Converter - Premium Online File Conversion Tool
- * 
- * Design Philosophy:
- * - Modern, clean interface with gradient accents
- * - Premium typography (Poppins for headers, Inter for body)
- * - Smooth animations and transitions
- * - Mobile-first responsive design
- * - SEO-optimized content structure
- * - Support for multiple file format conversions
- */
+import { trpc } from "@/lib/trpc";
 
 // Image format options
 const IMAGE_FORMATS = [
@@ -44,6 +34,8 @@ const DOCUMENT_FORMATS = [
 ];
 
 export default function Home() {
+  const { user, loading, error, isAuthenticated, logout } = useAuth();
+
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [documentFiles, setDocumentFiles] = useState<File[]>([]);
   const [selectedImageFormat, setSelectedImageFormat] = useState('pdf');
@@ -51,6 +43,10 @@ export default function Home() {
   const [converting, setConverting] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
+
+  // tRPC mutations
+  const convertImageMutation = trpc.fileConverter.convertImage.useMutation();
+  const convertDocumentMutation = trpc.fileConverter.convertDocument.useMutation();
 
   // Handle image conversion
   const handleImageConversion = async () => {
@@ -61,15 +57,37 @@ export default function Home() {
 
     setConverting(true);
     try {
-      // Simulate conversion process
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Convert each image file
+      for (const file of imageFiles) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const base64Data = (e.target?.result as string).split(',')[1];
+          
+          try {
+            const result = await convertImageMutation.mutateAsync({
+              fileData: base64Data,
+              fileName: file.name.split('.')[0],
+              targetFormat: selectedImageFormat as any,
+            });
+
+            // Create download link
+            const link = document.createElement('a');
+            link.href = result.url;
+            link.download = result.fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            toast.success(`Successfully converted ${file.name}`);
+          } catch (error) {
+            toast.error(`Failed to convert ${file.name}`);
+            console.error(error);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
       
-      toast.success(`Successfully converted ${imageFiles.length} image(s) to ${selectedImageFormat.toUpperCase()}`);
       setImageFiles([]);
-      
-      // In production, this would trigger actual file download
-    } catch (error) {
-      toast.error("Conversion failed. Please try again.");
     } finally {
       setConverting(false);
     }
@@ -84,15 +102,39 @@ export default function Home() {
 
     setConverting(true);
     try {
-      // Simulate conversion process
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Convert each document file
+      for (const file of documentFiles) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const base64Data = (e.target?.result as string).split(',')[1];
+          const sourceFormat = file.name.split('.').pop()?.toLowerCase() || 'pdf';
+          
+          try {
+            const result = await convertDocumentMutation.mutateAsync({
+              fileData: base64Data,
+              fileName: file.name.split('.')[0],
+              sourceFormat: sourceFormat as any,
+              targetFormat: selectedDocumentFormat as any,
+            });
+
+            // Create download link
+            const link = document.createElement('a');
+            link.href = result.url;
+            link.download = result.fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            toast.success(`Successfully converted ${file.name}`);
+          } catch (error) {
+            toast.error(`Failed to convert ${file.name}`);
+            console.error(error);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
       
-      toast.success(`Successfully converted ${documentFiles.length} document(s) to ${selectedDocumentFormat.toUpperCase()}`);
       setDocumentFiles([]);
-      
-      // In production, this would trigger actual file download
-    } catch (error) {
-      toast.error("Conversion failed. Please try again.");
     } finally {
       setConverting(false);
     }
@@ -337,7 +379,7 @@ export default function Home() {
               <Lock className="w-10 h-10 text-blue-600 mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">100% Secure</h3>
               <p className="text-gray-600">
-                Your files are processed locally and never stored on our servers. Complete privacy guaranteed.
+                Your files are processed securely and never stored permanently. Complete privacy guaranteed.
               </p>
             </Card>
 
@@ -370,153 +412,6 @@ export default function Home() {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Batch Convert</h3>
               <p className="text-gray-600">
                 Convert multiple files at once and save time. Perfect for bulk processing.
-              </p>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Supported Formats Section */}
-      <section className="py-16 md:py-24 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
-            Supported Formats
-          </h2>
-          
-          <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <ImageIcon className="w-6 h-6 text-blue-600" />
-                Image Formats
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
-                {IMAGE_FORMATS.map(format => (
-                  <div key={format.value} className="flex items-center gap-2 text-gray-700">
-                    <span className="text-2xl">{format.icon}</span>
-                    <span className="font-medium">{format.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <FileText className="w-6 h-6 text-indigo-600" />
-                Document Formats
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
-                {DOCUMENT_FORMATS.map(format => (
-                  <div key={format.value} className="flex items-center gap-2 text-gray-700">
-                    <span className="text-2xl">{format.icon}</span>
-                    <span className="font-medium">{format.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <section id="how-it-works" className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
-            How It Works
-          </h2>
-          
-          <div className="max-w-3xl mx-auto space-y-8">
-            <div className="flex gap-6">
-              <div className="flex-shrink-0">
-                <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-blue-600 text-white font-bold text-lg">
-                  1
-                </div>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload Your File</h3>
-                <p className="text-gray-600">
-                  Select one or multiple image or document files from your device. Supports 18+ file formats.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-6">
-              <div className="flex-shrink-0">
-                <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-blue-600 text-white font-bold text-lg">
-                  2
-                </div>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Choose Target Format</h3>
-                <p className="text-gray-600">
-                  Select the format you want to convert to. Our tool handles the conversion automatically with optimal settings.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-6">
-              <div className="flex-shrink-0">
-                <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-blue-600 text-white font-bold text-lg">
-                  3
-                </div>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Download Your Files</h3>
-                <p className="text-gray-600">
-                  Once conversion is complete, download your files instantly. All conversions are performed securely and privately.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section id="faq" className="bg-white py-16 md:py-24 border-t border-gray-100">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
-            Frequently Asked Questions
-          </h2>
-          
-          <div className="max-w-2xl mx-auto space-y-6">
-            <Card className="card-elevated p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Is the conversion really free?</h3>
-              <p className="text-gray-600">
-                Yes, completely free! Our universal file converter is 100% free to use with no hidden charges or premium features.
-              </p>
-            </Card>
-
-            <Card className="card-elevated p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">What file formats are supported?</h3>
-              <p className="text-gray-600">
-                We support 8+ image formats (JPG, PNG, GIF, BMP, WebP, SVG, TIFF, ICO) and 10+ document formats (PDF, Word, Excel, PowerPoint, and more). You can convert between any of these formats seamlessly.
-              </p>
-            </Card>
-
-            <Card className="card-elevated p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Are my files secure?</h3>
-              <p className="text-gray-600">
-                Yes, your files are processed locally in your browser and never uploaded to our servers. Complete privacy is guaranteed.
-              </p>
-            </Card>
-
-            <Card className="card-elevated p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">What is the file size limit?</h3>
-              <p className="text-gray-600">
-                There is no strict file size limit, but for optimal performance, we recommend files under 50MB. Larger files may take longer to process.
-              </p>
-            </Card>
-
-            <Card className="card-elevated p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Can I convert multiple files at once?</h3>
-              <p className="text-gray-600">
-                Yes! Our batch conversion feature allows you to convert multiple files simultaneously, saving you time and effort.
-              </p>
-            </Card>
-
-            <Card className="card-elevated p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">What about image quality after conversion?</h3>
-              <p className="text-gray-600">
-                Our converter maintains the highest possible quality during conversion. We use advanced algorithms to ensure minimal quality loss.
               </p>
             </Card>
           </div>
