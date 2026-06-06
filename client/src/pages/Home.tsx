@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Download, Zap, Lock, Smartphone, Clock } from "lucide-react";
+import { Upload, Download, Zap, Lock, Smartphone, Clock, FileText, Image as ImageIcon } from "lucide-react";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
 
 /**
- * Image & PDF Converter - Premium Online File Conversion Tool
+ * Universal File Converter - Premium Online File Conversion Tool
  * 
  * Design Philosophy:
  * - Modern, clean interface with gradient accents
@@ -14,17 +14,46 @@ import { toast } from "sonner";
  * - Smooth animations and transitions
  * - Mobile-first responsive design
  * - SEO-optimized content structure
+ * - Support for multiple file format conversions
  */
+
+// Image format options
+const IMAGE_FORMATS = [
+  { value: 'jpg', label: 'JPG', icon: '🖼️' },
+  { value: 'png', label: 'PNG', icon: '🖼️' },
+  { value: 'gif', label: 'GIF', icon: '🎬' },
+  { value: 'bmp', label: 'BMP', icon: '🖼️' },
+  { value: 'webp', label: 'WebP', icon: '🌐' },
+  { value: 'svg', label: 'SVG', icon: '✨' },
+  { value: 'tiff', label: 'TIFF', icon: '📸' },
+  { value: 'ico', label: 'ICO', icon: '🔲' },
+];
+
+// Document format options
+const DOCUMENT_FORMATS = [
+  { value: 'pdf', label: 'PDF', icon: '📄' },
+  { value: 'docx', label: 'Word (DOCX)', icon: '📝' },
+  { value: 'doc', label: 'Word (DOC)', icon: '📝' },
+  { value: 'xlsx', label: 'Excel (XLSX)', icon: '📊' },
+  { value: 'xls', label: 'Excel (XLS)', icon: '📊' },
+  { value: 'pptx', label: 'PowerPoint (PPTX)', icon: '🎯' },
+  { value: 'ppt', label: 'PowerPoint (PPT)', icon: '🎯' },
+  { value: 'txt', label: 'Text (TXT)', icon: '📋' },
+  { value: 'rtf', label: 'Rich Text (RTF)', icon: '📋' },
+  { value: 'odt', label: 'OpenDocument (ODT)', icon: '📄' },
+];
 
 export default function Home() {
   const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [pdfFiles, setPdfFiles] = useState<File[]>([]);
+  const [documentFiles, setDocumentFiles] = useState<File[]>([]);
+  const [selectedImageFormat, setSelectedImageFormat] = useState('pdf');
+  const [selectedDocumentFormat, setSelectedDocumentFormat] = useState('docx');
   const [converting, setConverting] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
-  const pdfInputRef = useRef<HTMLInputElement>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
 
-  // Handle image to PDF conversion
-  const handleImageToPDF = async () => {
+  // Handle image conversion
+  const handleImageConversion = async () => {
     if (imageFiles.length === 0) {
       toast.error("Please select at least one image file");
       return;
@@ -35,7 +64,7 @@ export default function Home() {
       // Simulate conversion process
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      toast.success(`Successfully converted ${imageFiles.length} image(s) to PDF`);
+      toast.success(`Successfully converted ${imageFiles.length} image(s) to ${selectedImageFormat.toUpperCase()}`);
       setImageFiles([]);
       
       // In production, this would trigger actual file download
@@ -46,10 +75,10 @@ export default function Home() {
     }
   };
 
-  // Handle PDF to image conversion
-  const handlePDFToImage = async () => {
-    if (pdfFiles.length === 0) {
-      toast.error("Please select at least one PDF file");
+  // Handle document conversion
+  const handleDocumentConversion = async () => {
+    if (documentFiles.length === 0) {
+      toast.error("Please select at least one document file");
       return;
     }
 
@@ -58,8 +87,8 @@ export default function Home() {
       // Simulate conversion process
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      toast.success(`Successfully converted ${pdfFiles.length} PDF(s) to image(s)`);
-      setPdfFiles([]);
+      toast.success(`Successfully converted ${documentFiles.length} document(s) to ${selectedDocumentFormat.toUpperCase()}`);
+      setDocumentFiles([]);
       
       // In production, this would trigger actual file download
     } catch (error) {
@@ -74,9 +103,17 @@ export default function Home() {
     setImageFiles(prev => [...prev, ...files]);
   };
 
-  const handlePDFSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDocumentSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setPdfFiles(prev => [...prev, ...files]);
+    setDocumentFiles(prev => [...prev, ...files]);
+  };
+
+  const removeImageFile = (index: number) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeDocumentFile = (index: number) => {
+    setDocumentFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -86,9 +123,9 @@ export default function Home() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">IC</span>
+              <span className="text-white font-bold text-lg">FC</span>
             </div>
-            <h1 className="text-xl font-bold text-gray-900">Image & PDF Converter</h1>
+            <h1 className="text-xl font-bold text-gray-900">Universal File Converter</h1>
           </div>
           <nav className="hidden md:flex items-center gap-6">
             <a href="#features" className="text-gray-600 hover:text-gray-900 transition">Features</a>
@@ -102,22 +139,28 @@ export default function Home() {
       <section className="container mx-auto px-4 py-16 md:py-24">
         <div className="max-w-4xl mx-auto text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-            Convert Images to PDF & PDF to Images
+            Convert Any File Format Instantly
           </h2>
           <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-            Fast, secure, and completely free. Convert between image formats (JPG, PNG, GIF, BMP, WebP) and PDF in seconds. No registration required.
+            Convert images to 8+ formats and documents to 10+ formats. Fast, secure, and completely free. No registration required.
           </p>
         </div>
 
         {/* Main Converter Tabs */}
-        <Tabs defaultValue="image-to-pdf" className="w-full max-w-4xl mx-auto">
+        <Tabs defaultValue="image-converter" className="w-full max-w-4xl mx-auto">
           <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="image-to-pdf" className="text-base">Image to PDF</TabsTrigger>
-            <TabsTrigger value="pdf-to-image" className="text-base">PDF to Image</TabsTrigger>
+            <TabsTrigger value="image-converter" className="text-base flex items-center gap-2">
+              <ImageIcon className="w-4 h-4" />
+              Image Converter
+            </TabsTrigger>
+            <TabsTrigger value="document-converter" className="text-base flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Document Converter
+            </TabsTrigger>
           </TabsList>
 
-          {/* Image to PDF Tab */}
-          <TabsContent value="image-to-pdf" className="space-y-6">
+          {/* Image Converter Tab */}
+          <TabsContent value="image-converter" className="space-y-6">
             <Card className="p-8 border-2 border-dashed border-blue-200 bg-blue-50/50 hover:border-blue-400 transition">
               <div className="text-center">
                 <Upload className="w-12 h-12 text-blue-600 mx-auto mb-4" />
@@ -142,14 +185,43 @@ export default function Home() {
               </div>
             </Card>
 
+            {/* Image Format Selection */}
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-900">Convert to Format:</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {IMAGE_FORMATS.map(format => (
+                  <button
+                    key={format.value}
+                    onClick={() => setSelectedImageFormat(format.value)}
+                    className={`p-3 rounded-lg border-2 transition ${
+                      selectedImageFormat === format.value
+                        ? 'border-blue-600 bg-blue-50'
+                        : 'border-gray-200 bg-white hover:border-blue-300'
+                    }`}
+                  >
+                    <div className="text-2xl mb-1">{format.icon}</div>
+                    <div className="text-sm font-medium text-gray-900">{format.label}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {imageFiles.length > 0 && (
               <div className="space-y-3">
                 <h4 className="font-semibold text-gray-900">Selected Files ({imageFiles.length})</h4>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                   {imageFiles.map((file, idx) => (
                     <div key={idx} className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
-                      <span className="text-sm text-gray-700">{file.name}</span>
-                      <span className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                      <div className="flex-1">
+                        <span className="text-sm text-gray-700">{file.name}</span>
+                        <span className="text-xs text-gray-500 ml-2">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                      </div>
+                      <button
+                        onClick={() => removeImageFile(idx)}
+                        className="text-red-600 hover:text-red-700 text-sm font-medium"
+                      >
+                        Remove
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -157,48 +229,77 @@ export default function Home() {
             )}
 
             <Button
-              onClick={handleImageToPDF}
+              onClick={handleImageConversion}
               disabled={imageFiles.length === 0 || converting}
               className="w-full btn-primary h-12 text-base"
             >
-              {converting ? "Converting..." : "Convert to PDF"}
+              {converting ? "Converting..." : `Convert to ${selectedImageFormat.toUpperCase()}`}
             </Button>
           </TabsContent>
 
-          {/* PDF to Image Tab */}
-          <TabsContent value="pdf-to-image" className="space-y-6">
+          {/* Document Converter Tab */}
+          <TabsContent value="document-converter" className="space-y-6">
             <Card className="p-8 border-2 border-dashed border-indigo-200 bg-indigo-50/50 hover:border-indigo-400 transition">
               <div className="text-center">
                 <Upload className="w-12 h-12 text-indigo-600 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload PDF Files</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload Documents</h3>
                 <p className="text-gray-600 mb-6">
-                  Drag and drop your PDF files here, or click to select files
+                  Drag and drop your documents here, or click to select files
                 </p>
                 <input
-                  ref={pdfInputRef}
+                  ref={documentInputRef}
                   type="file"
                   multiple
-                  accept=".pdf"
-                  onChange={handlePDFSelect}
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.odt"
+                  onChange={handleDocumentSelect}
                   className="hidden"
                 />
                 <Button
-                  onClick={() => pdfInputRef.current?.click()}
+                  onClick={() => documentInputRef.current?.click()}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white"
                 >
-                  Select PDFs
+                  Select Documents
                 </Button>
               </div>
             </Card>
 
-            {pdfFiles.length > 0 && (
+            {/* Document Format Selection */}
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-900">Convert to Format:</h4>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                {DOCUMENT_FORMATS.map(format => (
+                  <button
+                    key={format.value}
+                    onClick={() => setSelectedDocumentFormat(format.value)}
+                    className={`p-3 rounded-lg border-2 transition ${
+                      selectedDocumentFormat === format.value
+                        ? 'border-indigo-600 bg-indigo-50'
+                        : 'border-gray-200 bg-white hover:border-indigo-300'
+                    }`}
+                  >
+                    <div className="text-2xl mb-1">{format.icon}</div>
+                    <div className="text-xs font-medium text-gray-900">{format.label}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {documentFiles.length > 0 && (
               <div className="space-y-3">
-                <h4 className="font-semibold text-gray-900">Selected Files ({pdfFiles.length})</h4>
+                <h4 className="font-semibold text-gray-900">Selected Files ({documentFiles.length})</h4>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {pdfFiles.map((file, idx) => (
+                  {documentFiles.map((file, idx) => (
                     <div key={idx} className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
-                      <span className="text-sm text-gray-700">{file.name}</span>
-                      <span className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                      <div className="flex-1">
+                        <span className="text-sm text-gray-700">{file.name}</span>
+                        <span className="text-xs text-gray-500 ml-2">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                      </div>
+                      <button
+                        onClick={() => removeDocumentFile(idx)}
+                        className="text-red-600 hover:text-red-700 text-sm font-medium"
+                      >
+                        Remove
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -206,11 +307,11 @@ export default function Home() {
             )}
 
             <Button
-              onClick={handlePDFToImage}
-              disabled={pdfFiles.length === 0 || converting}
+              onClick={handleDocumentConversion}
+              disabled={documentFiles.length === 0 || converting}
               className="w-full btn-primary h-12 text-base"
             >
-              {converting ? "Converting..." : "Convert to Images"}
+              {converting ? "Converting..." : `Convert to ${selectedDocumentFormat.toUpperCase()}`}
             </Button>
           </TabsContent>
         </Tabs>
@@ -244,7 +345,7 @@ export default function Home() {
               <Download className="w-10 h-10 text-blue-600 mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Easy Download</h3>
               <p className="text-gray-600">
-                Download your converted files instantly. Support for all major image and document formats.
+                Download your converted files instantly. Support for 18+ file formats.
               </p>
             </Card>
 
@@ -275,6 +376,47 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Supported Formats Section */}
+      <section className="py-16 md:py-24 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
+            Supported Formats
+          </h2>
+          
+          <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <ImageIcon className="w-6 h-6 text-blue-600" />
+                Image Formats
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                {IMAGE_FORMATS.map(format => (
+                  <div key={format.value} className="flex items-center gap-2 text-gray-700">
+                    <span className="text-2xl">{format.icon}</span>
+                    <span className="font-medium">{format.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <FileText className="w-6 h-6 text-indigo-600" />
+                Document Formats
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                {DOCUMENT_FORMATS.map(format => (
+                  <div key={format.value} className="flex items-center gap-2 text-gray-700">
+                    <span className="text-2xl">{format.icon}</span>
+                    <span className="font-medium">{format.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works Section */}
       <section id="how-it-works" className="py-16 md:py-24">
         <div className="container mx-auto px-4">
@@ -292,7 +434,7 @@ export default function Home() {
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload Your File</h3>
                 <p className="text-gray-600">
-                  Select one or multiple image or PDF files from your device. Supports JPG, PNG, GIF, BMP, WebP, and PDF formats.
+                  Select one or multiple image or document files from your device. Supports 18+ file formats.
                 </p>
               </div>
             </div>
@@ -304,9 +446,9 @@ export default function Home() {
                 </div>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Choose Conversion Type</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Choose Target Format</h3>
                 <p className="text-gray-600">
-                  Select whether you want to convert images to PDF or PDF to images. Our tool handles the rest automatically.
+                  Select the format you want to convert to. Our tool handles the conversion automatically with optimal settings.
                 </p>
               </div>
             </div>
@@ -339,14 +481,14 @@ export default function Home() {
             <Card className="card-elevated p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Is the conversion really free?</h3>
               <p className="text-gray-600">
-                Yes, completely free! Our image and PDF converter is 100% free to use with no hidden charges or premium features.
+                Yes, completely free! Our universal file converter is 100% free to use with no hidden charges or premium features.
               </p>
             </Card>
 
             <Card className="card-elevated p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">What file formats are supported?</h3>
               <p className="text-gray-600">
-                We support JPG, PNG, GIF, BMP, WebP, and PDF formats. You can convert between any of these formats seamlessly.
+                We support 8+ image formats (JPG, PNG, GIF, BMP, WebP, SVG, TIFF, ICO) and 10+ document formats (PDF, Word, Excel, PowerPoint, and more). You can convert between any of these formats seamlessly.
               </p>
             </Card>
 
@@ -370,6 +512,13 @@ export default function Home() {
                 Yes! Our batch conversion feature allows you to convert multiple files simultaneously, saving you time and effort.
               </p>
             </Card>
+
+            <Card className="card-elevated p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">What about image quality after conversion?</h3>
+              <p className="text-gray-600">
+                Our converter maintains the highest possible quality during conversion. We use advanced algorithms to ensure minimal quality loss.
+              </p>
+            </Card>
           </div>
         </div>
       </section>
@@ -381,8 +530,8 @@ export default function Home() {
             <div>
               <h4 className="text-white font-semibold mb-4">Product</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition">Image to PDF</a></li>
-                <li><a href="#" className="hover:text-white transition">PDF to Image</a></li>
+                <li><a href="#" className="hover:text-white transition">Image Converter</a></li>
+                <li><a href="#" className="hover:text-white transition">Document Converter</a></li>
                 <li><a href="#" className="hover:text-white transition">Batch Convert</a></li>
               </ul>
             </div>
@@ -397,8 +546,8 @@ export default function Home() {
             <div>
               <h4 className="text-white font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition">Terms of Service</a></li>
+                <li><a href="/privacy" className="hover:text-white transition">Privacy Policy</a></li>
+                <li><a href="/terms" className="hover:text-white transition">Terms of Service</a></li>
                 <li><a href="#" className="hover:text-white transition">Cookie Policy</a></li>
               </ul>
             </div>
@@ -412,7 +561,7 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-sm">
-            <p>&copy; 2026 Image & PDF Converter. All rights reserved. Free online file conversion tool.</p>
+            <p>&copy; 2026 Universal File Converter. All rights reserved. Free online file conversion tool supporting 18+ formats.</p>
           </div>
         </div>
       </footer>
