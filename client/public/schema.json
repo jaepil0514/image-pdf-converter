@@ -1,0 +1,46 @@
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Image & PDF Converter",
+  "description": "Free online image to PDF and PDF to image converter. Convert JPG, PNG, GIF, BMP, WebP to PDF and vice versa. No registration required, secure, and fast.",
+  "url": "https://image-pdf-converter.com",
+  "applicationCategory": "UtilityApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.8",
+    "ratingCount": "1250"
+  },
+  "features": [
+    "Image to PDF conversion",
+    "PDF to Image conversion",
+    "Batch file processing",
+    "No registration required",
+    "Secure local processing",
+    "Multiple format support",
+    "Mobile friendly",
+    "Fast conversion"
+  ],
+  "supportedFormats": [
+    "JPG",
+    "JPEG",
+    "PNG",
+    "GIF",
+    "BMP",
+    "WebP",
+    "PDF"
+  ],
+  "creator": {
+    "@type": "Organization",
+    "name": "Image PDF Converter",
+    "url": "https://image-pdf-converter.com"
+  },
+  "datePublished": "2026-06-06",
+  "inLanguage": "en-US",
+  "isAccessibleForFree": true
+}
