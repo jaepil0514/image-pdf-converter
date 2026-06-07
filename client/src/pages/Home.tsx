@@ -452,7 +452,6 @@ export default function Home() {
               <ul className="space-y-2 text-sm">
                 <li><a href="/how-it-works" className="hover:text-white transition">How It Works</a></li>
                 <li><a href="/faq" className="hover:text-white transition">FAQ</a></li>
-                <li><a href="/chatgpt" className="hover:text-white transition">ChatGPT Assistant</a></li>
               </ul>
             </div>
             <div>
