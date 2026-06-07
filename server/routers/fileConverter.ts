@@ -12,6 +12,23 @@ type ImageFormat = (typeof IMAGE_FORMATS)[number];
 const DOCUMENT_FORMATS = ["pdf", "docx", "doc", "xlsx", "xls", "pptx", "ppt", "txt", "rtf", "odt"] as const;
 type DocumentFormat = (typeof DOCUMENT_FORMATS)[number];
 
+/**
+ * Attempt to recover from image format issues by converting to PNG first
+ */
+async function recoverImageBuffer(buffer: Buffer): Promise<Buffer> {
+  try {
+    // Try to convert to PNG as an intermediate format
+    // This helps with HEIF, corrupted, or unsupported formats
+    const recovered = await sharp(buffer)
+      .png({ progressive: true })
+      .toBuffer();
+    return recovered as Buffer;
+  } catch (error) {
+    console.error("[Image Recovery] Failed to convert to PNG:", error);
+    throw new Error(`Unable to process image: ${error instanceof Error ? error.message : "Unknown error"}`);
+  }
+}
+
 export const fileConverterRouter = router({
   // Convert image to another format
   convertImage: publicProcedure
@@ -25,7 +42,30 @@ export const fileConverterRouter = router({
     .mutation(async ({ input }) => {
       try {
         // Decode base64 to buffer
-        const buffer = Buffer.from(input.fileData, "base64");
+        let buffer = Buffer.from(input.fileData, "base64");
+
+        // Try to detect format issues early and recover
+        let sharpInstance: sharp.Sharp;
+        try {
+          sharpInstance = sharp(buffer);
+          // Try to get metadata to detect format issues
+          await sharpInstance.metadata();
+        } catch (metadataError) {
+          // If metadata detection fails, attempt recovery
+          console.warn(
+            "[Image Conversion] Metadata detection failed, attempting format recovery",
+            metadataError instanceof Error ? metadataError.message : "Unknown error"
+          );
+          try {
+            buffer = (await recoverImageBuffer(buffer)) as any;
+            sharpInstance = sharp(buffer);
+          } catch (recoveryError) {
+            console.error("[Image Conversion] Recovery failed:", recoveryError);
+            throw new Error(
+              `Unable to process image format: ${recoveryError instanceof Error ? recoveryError.message : "Unknown error"}`
+            );
+          }
+        }
 
         // Convert using sharp
         let convertedBuffer: Buffer;
@@ -33,24 +73,36 @@ export const fileConverterRouter = router({
         switch (input.targetFormat) {
           case "jpg":
           case "jpeg":
-            convertedBuffer = await sharp(buffer).jpeg({ quality: 90 }).toBuffer();
+            convertedBuffer = await sharpInstance
+              .jpeg({ quality: 90, progressive: true })
+              .toBuffer();
             break;
           case "png":
-            convertedBuffer = await sharp(buffer).png().toBuffer();
+            convertedBuffer = await sharpInstance
+              .png({ progressive: true })
+              .toBuffer();
             break;
           case "webp":
-            convertedBuffer = await sharp(buffer).webp({ quality: 90 }).toBuffer();
+            convertedBuffer = await sharpInstance
+              .webp({ quality: 90 })
+              .toBuffer();
             break;
           case "gif":
-            convertedBuffer = await sharp(buffer).gif().toBuffer();
+            convertedBuffer = await sharpInstance
+              .gif()
+              .toBuffer();
             break;
           case "bmp":
             // BMP conversion via PNG then buffer
-            convertedBuffer = await sharp(buffer).png().toBuffer();
+            convertedBuffer = await sharpInstance
+              .png()
+              .toBuffer();
             break;
           case "tiff":
             // TIFF conversion
-            convertedBuffer = await sharp(buffer).png().toBuffer();
+            convertedBuffer = await sharpInstance
+              .tiff({ compression: "lzw" })
+              .toBuffer();
             break;
           case "svg":
             // SVG conversion is complex, return placeholder
@@ -60,7 +112,10 @@ export const fileConverterRouter = router({
             break;
           case "ico":
             // ICO conversion via PNG
-            convertedBuffer = await sharp(buffer).resize(32, 32).png().toBuffer();
+            convertedBuffer = await sharpInstance
+              .resize(32, 32)
+              .png()
+              .toBuffer();
             break;
           default:
             throw new Error(`Unsupported format: ${input.targetFormat}`);

@@ -37,6 +37,11 @@
 - [ ] Deploy to production
 - [ ] Monitor conversion performance
 
+## Bug Fixes
+- [x] Fixed HEIF/HEIC image format support issues
+- [x] Added error recovery for corrupted image files
+- [x] Improved image conversion error handling
+
 ## Known Issues to Address
 - [ ] AdSense domain validation with .manus.space subdomain
 - [ ] Consider custom domain setup for better AdSense approval
