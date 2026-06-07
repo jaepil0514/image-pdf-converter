@@ -99,54 +99,7 @@ export default function Home() {
 
   // Handle document conversion
   const handleDocumentConversion = async () => {
-    if (documentFiles.length === 0) {
-      toast.error("Please select at least one document file");
-      return;
-    }
-
-    setConverting(true);
-    try {
-      // Convert each document file
-      for (const file of documentFiles) {
-        try {
-          const base64Data = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              const result = e.target?.result as string;
-              resolve(result.split(',')[1]);
-            };
-            reader.onerror = () => reject(new Error("Failed to read file"));
-            reader.readAsDataURL(file);
-          });
-          
-          const sourceFormat = file.name.split('.').pop()?.toLowerCase() || 'pdf';
-          
-          const result = await convertDocumentMutation.mutateAsync({
-            fileData: base64Data,
-            fileName: file.name.split('.')[0],
-            sourceFormat: sourceFormat as any,
-            targetFormat: selectedDocumentFormat as any,
-          });
-
-          // Create download link
-          const link = document.createElement('a');
-          link.href = result.url;
-          link.download = result.fileName;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-
-          toast.success(`Successfully converted ${file.name}`);
-        } catch (error) {
-          toast.error(`Failed to convert ${file.name}`);
-          console.error(error);
-        }
-      }
-      
-      setDocumentFiles([]);
-    } finally {
-      setConverting(false);
-    }
+    toast.info("Document conversion is coming soon. Please check back later!");
   };
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -357,12 +310,17 @@ export default function Home() {
               </div>
             )}
 
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+              <p className="text-yellow-800 text-sm font-medium">
+                📋 Document conversion is coming soon! We're working on adding support for document format conversion.
+              </p>
+            </div>
             <Button
               onClick={handleDocumentConversion}
-              disabled={documentFiles.length === 0 || converting}
-              className="w-full btn-primary h-12 text-base"
+              disabled={true}
+              className="w-full btn-primary h-12 text-base opacity-50 cursor-not-allowed"
             >
-              {converting ? "Converting..." : `Convert to ${selectedDocumentFormat.toUpperCase()}`}
+              Coming Soon
             </Button>
           </TabsContent>
         </Tabs>

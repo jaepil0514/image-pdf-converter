@@ -1,16 +1,48 @@
 import { publicProcedure, router } from "../_core/trpc";
 import { z } from "zod";
 import sharp from "sharp";
-import { PDFDocument } from "pdf-lib";
 import { storagePut } from "../storage";
 
 // Supported image formats
-const IMAGE_FORMATS = ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg", "tiff", "ico"] as const;
+const IMAGE_FORMATS = ["jpg", "jpeg", "png", "gif", "bmp", "webp", "tiff", "ico"] as const;
 type ImageFormat = (typeof IMAGE_FORMATS)[number];
 
-// Supported document formats
+// Supported document formats (placeholder - not yet implemented)
 const DOCUMENT_FORMATS = ["pdf", "docx", "doc", "xlsx", "xls", "pptx", "ppt", "txt", "rtf", "odt"] as const;
 type DocumentFormat = (typeof DOCUMENT_FORMATS)[number];
+
+// Constants
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const SUPPORTED_IMAGE_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/bmp",
+  "image/webp",
+  "image/tiff",
+  "image/x-icon",
+];
+
+/**
+ * Validate base64 string
+ */
+function isValidBase64(str: string): boolean {
+  try {
+    return Buffer.from(str, "base64").toString("base64") === str;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Sanitize filename to prevent directory traversal and invalid characters
+ */
+function sanitizeFileName(fileName: string): string {
+  return fileName
+    .replace(/[^a-zA-Z0-9._-]/g, "_")
+    .replace(/^\.+/, "")
+    .slice(0, 255);
+}
 
 /**
  * Attempt to recover from image format issues by converting to PNG first
@@ -35,14 +67,28 @@ export const fileConverterRouter = router({
     .input(
       z.object({
         fileData: z.string(), // Base64 encoded file data
-        fileName: z.string(),
+        fileName: z.string().min(1).max(255),
         targetFormat: z.enum(IMAGE_FORMATS),
       })
     )
     .mutation(async ({ input }) => {
       try {
+        // Validate base64 input
+        if (!isValidBase64(input.fileData)) {
+          throw new Error("Invalid base64 encoding");
+        }
+
         // Decode base64 to buffer
         let buffer = Buffer.from(input.fileData, "base64");
+
+        // Check file size
+        if (buffer.length > MAX_FILE_SIZE) {
+          throw new Error(`File size exceeds maximum limit of ${MAX_FILE_SIZE / 1024 / 1024}MB`);
+        }
+
+        if (buffer.length === 0) {
+          throw new Error("File is empty");
+        }
 
         // Try to detect format issues early and recover
         let sharpInstance: sharp.Sharp;
@@ -104,12 +150,6 @@ export const fileConverterRouter = router({
               .tiff({ compression: "lzw" })
               .toBuffer();
             break;
-          case "svg":
-            // SVG conversion is complex, return placeholder
-            convertedBuffer = Buffer.from(
-              `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><text>Converted Image</text></svg>`
-            );
-            break;
           case "ico":
             // ICO conversion via PNG
             convertedBuffer = await sharpInstance
@@ -121,14 +161,17 @@ export const fileConverterRouter = router({
             throw new Error(`Unsupported format: ${input.targetFormat}`);
         }
 
+        // Sanitize filename
+        const sanitizedFileName = sanitizeFileName(input.fileName);
+
         // Upload to storage
-        const fileKey = `conversions/${Date.now()}_${input.fileName}.${input.targetFormat}`;
+        const fileKey = `conversions/${Date.now()}_${sanitizedFileName}.${input.targetFormat}`;
         const { url } = await storagePut(fileKey, convertedBuffer, `image/${input.targetFormat}`);
 
         return {
           success: true,
           url,
-          fileName: `${input.fileName}.${input.targetFormat}`,
+          fileName: `${sanitizedFileName}.${input.targetFormat}`,
           fileSize: convertedBuffer.length,
         };
       } catch (error) {
@@ -137,111 +180,31 @@ export const fileConverterRouter = router({
       }
     }),
 
-  // Convert document to PDF (simplified version)
+  // Convert document to PDF (not yet implemented)
   convertDocumentToPdf: publicProcedure
     .input(
       z.object({
-        fileData: z.string(), // Base64 encoded file data
+        fileData: z.string(),
         fileName: z.string(),
         sourceFormat: z.enum(DOCUMENT_FORMATS),
       })
     )
-    .mutation(async ({ input }) => {
-      try {
-        // For this implementation, we'll create a simple PDF with the file name
-        // In production, you'd use libraries like libreoffice-convert or similar
-        const pdfDoc = await PDFDocument.create();
-        const page = pdfDoc.addPage([600, 800]);
-
-        page.drawText(`Converted Document: ${input.fileName}`, {
-          x: 50,
-          y: 750,
-          size: 16,
-        });
-
-        page.drawText(`Original Format: ${input.sourceFormat.toUpperCase()}`, {
-          x: 50,
-          y: 700,
-          size: 12,
-        });
-
-        page.drawText(`Conversion Date: ${new Date().toISOString()}`, {
-          x: 50,
-          y: 650,
-          size: 12,
-        });
-
-        const pdfBytes = await pdfDoc.save();
-        const buffer = Buffer.from(pdfBytes);
-
-        // Upload to storage
-        const fileKey = `conversions/${Date.now()}_${input.fileName}.pdf`;
-        const { url } = await storagePut(fileKey, buffer, "application/pdf");
-
-        return {
-          success: true,
-          url,
-          fileName: `${input.fileName}.pdf`,
-          fileSize: buffer.length,
-        };
-      } catch (error) {
-        console.error("[Document Conversion Error]", error);
-        throw new Error(`Failed to convert document: ${error instanceof Error ? error.message : "Unknown error"}`);
-      }
+    .mutation(async () => {
+      throw new Error("Document conversion is coming soon. This feature is not yet available.");
     }),
 
-  // Convert document between formats (simplified)
+  // Convert document between formats (not yet implemented)
   convertDocument: publicProcedure
     .input(
       z.object({
-        fileData: z.string(), // Base64 encoded file data
+        fileData: z.string(),
         fileName: z.string(),
         sourceFormat: z.enum(DOCUMENT_FORMATS),
         targetFormat: z.enum(DOCUMENT_FORMATS),
       })
     )
-    .mutation(async ({ input }) => {
-      try {
-        // For now, we'll convert any document format to PDF
-        // In production, you'd use a more sophisticated conversion library
-        const pdfDoc = await PDFDocument.create();
-        const page = pdfDoc.addPage([600, 800]);
-
-        page.drawText(`Converted Document: ${input.fileName}`, {
-          x: 50,
-          y: 750,
-          size: 16,
-        });
-
-        page.drawText(`From: ${input.sourceFormat.toUpperCase()} to ${input.targetFormat.toUpperCase()}`, {
-          x: 50,
-          y: 700,
-          size: 12,
-        });
-
-        page.drawText(`Conversion Date: ${new Date().toISOString()}`, {
-          x: 50,
-          y: 650,
-          size: 12,
-        });
-
-        const pdfBytes = await pdfDoc.save();
-        const buffer = Buffer.from(pdfBytes);
-
-        // Upload to storage
-        const fileKey = `conversions/${Date.now()}_${input.fileName}.${input.targetFormat}`;
-        const { url } = await storagePut(fileKey, buffer, `application/${input.targetFormat}`);
-
-        return {
-          success: true,
-          url,
-          fileName: `${input.fileName}.${input.targetFormat}`,
-          fileSize: buffer.length,
-        };
-      } catch (error) {
-        console.error("[Document Conversion Error]", error);
-        throw new Error(`Failed to convert document: ${error instanceof Error ? error.message : "Unknown error"}`);
-      }
+    .mutation(async () => {
+      throw new Error("Document conversion is coming soon. This feature is not yet available.");
     }),
 
   // Get supported formats
@@ -249,6 +212,11 @@ export const fileConverterRouter = router({
     return {
       imageFormats: IMAGE_FORMATS,
       documentFormats: DOCUMENT_FORMATS,
+      maxFileSize: MAX_FILE_SIZE,
+      status: {
+        imageConversion: "supported",
+        documentConversion: "coming_soon",
+      },
     };
   }),
 });
