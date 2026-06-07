@@ -2,18 +2,13 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /private
+Disallow: /*.json$
 
-Sitemap: https://image-pdf-converter.com/sitemap.xml
+Sitemap: https://imgpdfconv-fjkyzpuq.manus.space/sitemap.xml
 
-# Allow ChatGPT crawler
-User-agent: GPTBot
-Allow: /
-
-# Allow Google Gemini crawler
 User-agent: Googlebot
 Allow: /
 
-# Allow other search engines
 User-agent: Bingbot
 Allow: /
 
@@ -22,3 +17,9 @@ Allow: /
 
 User-agent: DuckDuckBot
 Allow: /
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /

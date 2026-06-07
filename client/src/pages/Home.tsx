@@ -452,7 +452,7 @@ export default function Home() {
               <ul className="space-y-2 text-sm">
                 <li><a href="/privacy" className="hover:text-white transition">Privacy Policy</a></li>
                 <li><a href="/terms" className="hover:text-white transition">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white transition">Cookie Policy</a></li>
+                <li><a href="/cookies" className="hover:text-white transition">Cookie Policy</a></li>
               </ul>
             </div>
             <div>
@@ -465,7 +465,8 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-sm">
-            <p>&copy; 2026 Universal File Converter. All rights reserved. Free online file conversion tool supporting 18+ formats.</p>
+            <p>&copy; 2026 Image & PDF Converter. All rights reserved. Free online file conversion tool supporting 18+ formats.</p>
+            <p className="mt-2 text-gray-500">Convert images and documents securely. No registration required.</p>
           </div>
         </div>
       </footer>

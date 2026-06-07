@@ -3,85 +3,104 @@ export default function PrivacyPolicy() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <div className="container mx-auto px-4 py-16 max-w-4xl">
         <h1 className="text-4xl font-bold text-gray-900 mb-8">Privacy Policy</h1>
+        <p className="text-gray-600 mb-8">Last updated: June 2026</p>
         
         <div className="prose prose-lg max-w-none text-gray-700 space-y-6">
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">1. Introduction</h2>
             <p>
-              Image & PDF Converter ("we," "our," or "us") operates the image-pdf-converter.com website. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website.
+              Image & PDF Converter ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our file conversion services.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">2. Information We Collect</h2>
-            <p>
-              We may collect information about you in a variety of ways. The information we may collect on the site includes:
-            </p>
+            <p>We collect minimal information necessary to provide our services:</p>
             <ul className="list-disc list-inside space-y-2 ml-4">
-              <li><strong>Personal Data:</strong> Personally identifiable information, such as your name, shipping address, email address, and telephone number, that you voluntarily give to us when you register with the site or when you choose to participate in various activities related to the site.</li>
-              <li><strong>Financial Data:</strong> Financial information, such as data related to your payment method (e.g., valid credit card number, card brand, expiration date) that we may collect when you purchase, order, return, exchange, or request information about our services from the site.</li>
-              <li><strong>Data From Social Networks:</strong> User information from social networks, including your name, your social network username, location, gender, birth date, email address, profile picture, and public data for contacts.</li>
-              <li><strong>Mobile Device Data:</strong> Device information, such as your mobile device ID, model, and manufacturer, and information about the location of your device.</li>
-              <li><strong>Third-Party Data:</strong> Information from third parties, including but not limited to information from our business partners.</li>
+              <li><strong>Uploaded Files:</strong> Files you upload are temporarily stored in memory for conversion processing only. Files are permanently deleted immediately after conversion completion.</li>
+              <li><strong>Usage Analytics:</strong> We collect anonymized data about conversion types, success rates, and service usage to improve our platform.</li>
+              <li><strong>Device Information:</strong> Standard web server logs including IP address, browser type, operating system, and referring URLs.</li>
+              <li><strong>Cookies:</strong> We use essential cookies for session management and optional analytics cookies to understand user behavior.</li>
+              <li><strong>Authentication Data:</strong> If you create an account, we store your email and authentication credentials securely.</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">3. Use of Your Information</h2>
-            <p>
-              Having accurate information about you permits us to provide you with a smooth, efficient, and customized experience. Specifically, we may use information collected about you via the site to:
-            </p>
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">3. How We Use Your Information</h2>
+            <p>We use collected information to:</p>
             <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>Generate a personal profile about you so that future visits to the site will be personalized as possible.</li>
-              <li>Increase the efficiency and operation of the site.</li>
-              <li>Monitor and analyze usage and trends to improve your experience with the site.</li>
-              <li>Notify you of updates to the site.</li>
-              <li>Offer new products, services, and/or recommendations to you.</li>
-              <li>Perform other business activities as needed.</li>
+              <li>Process and convert your files</li>
+              <li>Improve our service quality and user experience</li>
+              <li>Detect and prevent fraud or abuse</li>
+              <li>Comply with legal obligations</li>
+              <li>Send important service updates (if you opt-in)</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">4. Disclosure of Your Information</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">4. Data Security</h2>
             <p>
-              We may share information we have collected about you in certain situations:
+              We implement industry-standard security measures to protect your data:
             </p>
             <ul className="list-disc list-inside space-y-2 ml-4">
-              <li><strong>By Law or to Protect Rights:</strong> If we believe the release of information about you is necessary to comply with the law, enforce our site policies, or protect ours or others' rights, property, or safety.</li>
-              <li><strong>Third-Party Service Providers:</strong> We may share your information with third parties that perform services for us or on our behalf, including payment processing, data analysis, email delivery, hosting services, customer service, and marketing assistance.</li>
-              <li><strong>Business Transfers:</strong> If Image & PDF Converter is involved in a merger, acquisition, bankruptcy, dissolution, reorganization, similar transaction or proceeding, your information may be part of that transaction or proceeding.</li>
+              <li>HTTPS encryption for all data in transit</li>
+              <li>Secure file storage with automatic deletion</li>
+              <li>Regular security audits and updates</li>
+              <li>Limited access to personal information</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">5. Security of Your Information</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">5. Third-Party Services</h2>
             <p>
-              We use administrative, technical, and physical security measures to help protect your personal information. While we have taken reasonable steps to secure the personal information you provide to us, please be aware that despite our efforts, no security measures are perfect or impenetrable.
+              We use third-party services for analytics and advertising:
+            </p>
+            <ul className="list-disc list-inside space-y-2 ml-4">
+              <li><strong>Google Analytics:</strong> To understand how users interact with our site</li>
+              <li><strong>Google AdSense:</strong> To display relevant advertisements</li>
+              <li><strong>Cloud Storage:</strong> To securely store converted files temporarily</li>
+            </ul>
+            <p>
+              These services have their own privacy policies. We encourage you to review them.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">6. Contact Us</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">6. Your Rights</h2>
+            <p>You have the right to:</p>
+            <ul className="list-disc list-inside space-y-2 ml-4">
+              <li>Access your personal information</li>
+              <li>Request deletion of your data</li>
+              <li>Opt-out of marketing communications</li>
+              <li>Control cookie preferences</li>
+              <li>Request data portability</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">7. Children's Privacy</h2>
             <p>
-              If you have questions or comments about this Privacy Policy, please contact us at:
-            </p>
-            <p>
-              Image & PDF Converter<br/>
-              Email: privacy@image-pdf-converter.com<br/>
-              Website: https://image-pdf-converter.com
+              Our service is not intended for children under 13 years old. We do not knowingly collect personal information from children. If we become aware of such collection, we will delete the information immediately.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">7. Changes to This Privacy Policy</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">8. Policy Updates</h2>
             <p>
-              We reserve the right to modify this privacy policy at any time. Changes and clarifications will take effect immediately upon their posting on the website. If we make material changes to this policy, we will notify you here that it has been updated.
+              We may update this Privacy Policy periodically. We will notify you of significant changes via email or prominent notice on our website.
             </p>
           </section>
 
-          <p className="text-sm text-gray-500 mt-12">
-            Last Updated: June 6, 2026
-          </p>
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">9. Contact Us</h2>
+            <p>
+              For privacy-related questions or concerns, please contact us at:
+            </p>
+            <div className="bg-gray-100 p-4 rounded-lg mt-4">
+              <p><strong>Email:</strong> privacy@imgpdfconv.com</p>
+              <p><strong>Website:</strong> https://imgpdfconv-fjkyzpuq.manus.space</p>
+            </div>
+          </section>
         </div>
       </div>
     </div>
