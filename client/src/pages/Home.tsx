@@ -38,7 +38,7 @@ export default function Home() {
 
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [documentFiles, setDocumentFiles] = useState<File[]>([]);
-  const [selectedImageFormat, setSelectedImageFormat] = useState('pdf');
+  const [selectedImageFormat, setSelectedImageFormat] = useState('jpg');
   const [selectedDocumentFormat, setSelectedDocumentFormat] = useState('docx');
   const [converting, setConverting] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -59,32 +59,36 @@ export default function Home() {
     try {
       // Convert each image file
       for (const file of imageFiles) {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          const base64Data = (e.target?.result as string).split(',')[1];
+        try {
+          const base64Data = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const result = e.target?.result as string;
+              resolve(result.split(',')[1]);
+            };
+            reader.onerror = () => reject(new Error("Failed to read file"));
+            reader.readAsDataURL(file);
+          });
           
-          try {
-            const result = await convertImageMutation.mutateAsync({
-              fileData: base64Data,
-              fileName: file.name.split('.')[0],
-              targetFormat: selectedImageFormat as any,
-            });
+          const result = await convertImageMutation.mutateAsync({
+            fileData: base64Data,
+            fileName: file.name.split('.')[0],
+            targetFormat: selectedImageFormat as any,
+          });
 
-            // Create download link
-            const link = document.createElement('a');
-            link.href = result.url;
-            link.download = result.fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+          // Create download link
+          const link = document.createElement('a');
+          link.href = result.url;
+          link.download = result.fileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
 
-            toast.success(`Successfully converted ${file.name}`);
-          } catch (error) {
-            toast.error(`Failed to convert ${file.name}`);
-            console.error(error);
-          }
-        };
-        reader.readAsDataURL(file);
+          toast.success(`Successfully converted ${file.name}`);
+        } catch (error) {
+          toast.error(`Failed to convert ${file.name}`);
+          console.error(error);
+        }
       }
       
       setImageFiles([]);
@@ -104,34 +108,39 @@ export default function Home() {
     try {
       // Convert each document file
       for (const file of documentFiles) {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          const base64Data = (e.target?.result as string).split(',')[1];
+        try {
+          const base64Data = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const result = e.target?.result as string;
+              resolve(result.split(',')[1]);
+            };
+            reader.onerror = () => reject(new Error("Failed to read file"));
+            reader.readAsDataURL(file);
+          });
+          
           const sourceFormat = file.name.split('.').pop()?.toLowerCase() || 'pdf';
           
-          try {
-            const result = await convertDocumentMutation.mutateAsync({
-              fileData: base64Data,
-              fileName: file.name.split('.')[0],
-              sourceFormat: sourceFormat as any,
-              targetFormat: selectedDocumentFormat as any,
-            });
+          const result = await convertDocumentMutation.mutateAsync({
+            fileData: base64Data,
+            fileName: file.name.split('.')[0],
+            sourceFormat: sourceFormat as any,
+            targetFormat: selectedDocumentFormat as any,
+          });
 
-            // Create download link
-            const link = document.createElement('a');
-            link.href = result.url;
-            link.download = result.fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+          // Create download link
+          const link = document.createElement('a');
+          link.href = result.url;
+          link.download = result.fileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
 
-            toast.success(`Successfully converted ${file.name}`);
-          } catch (error) {
-            toast.error(`Failed to convert ${file.name}`);
-            console.error(error);
-          }
-        };
-        reader.readAsDataURL(file);
+          toast.success(`Successfully converted ${file.name}`);
+        } catch (error) {
+          toast.error(`Failed to convert ${file.name}`);
+          console.error(error);
+        }
       }
       
       setDocumentFiles([]);

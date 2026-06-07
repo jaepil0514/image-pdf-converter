@@ -213,7 +213,7 @@ export const fileConverterRouter = router({
           size: 16,
         });
 
-        page.drawText(`From: ${input.sourceFormat.toUpperCase()} → To: ${input.targetFormat.toUpperCase()}`, {
+        page.drawText(`From: ${input.sourceFormat.toUpperCase()} to ${input.targetFormat.toUpperCase()}`, {
           x: 50,
           y: 700,
           size: 12,
