@@ -448,6 +448,14 @@ export default function Home() {
               </ul>
             </div>
             <div>
+              <h4 className="text-white font-semibold mb-4">Resources</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="/how-it-works" className="hover:text-white transition">How It Works</a></li>
+                <li><a href="/faq" className="hover:text-white transition">FAQ</a></li>
+                <li><a href="/chatgpt" className="hover:text-white transition">ChatGPT Assistant</a></li>
+              </ul>
+            </div>
+            <div>
               <h4 className="text-white font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-sm">
                 <li><a href="/privacy" className="hover:text-white transition">Privacy Policy</a></li>
